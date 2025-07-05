@@ -42,7 +42,6 @@ st.markdown("""
 st.sidebar.markdown("## ℹ️ About")
 st.sidebar.info("""
 This app predicts diabetes risk using **machine learning**.
-
 - Based on **PIMA Diabetes dataset**
 - By **Siva** ❤️
 """)
@@ -137,19 +136,9 @@ if submitted:
         st.warning("⚠️ Medium confidence prediction. Consider professional evaluation.")
 
     st.markdown("### 📆 Personalized Health Check Reminder")
-
-    if prediction == 1:
-        if age > 50 or bmi > 30:
-            days_until_next = 30
-        elif age > 35:
-            days_until_next = 90
-        else:
-            days_until_next = 180
-    else:
-        days_until_next = 180
-
-    final_days = min(days_until_next + 15, 180)
-    next_check = datetime.today() + timedelta(days=final_days)
+    next_check = datetime.today() + timedelta(days=15)
+    if next_check.year > datetime.today().year:
+        next_check = datetime(datetime.today().year, 12, 31)
     st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}`")
 
     df = pd.DataFrame({
