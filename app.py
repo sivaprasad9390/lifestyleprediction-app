@@ -148,17 +148,23 @@ if submitted:
 
     # Checkup Schedule
     st.markdown("### 📆 Personalized Health Check Reminder")
-    if prediction == 1:
-        if age > 50 or bmi > 30:
-            days_until_next = 30
-        elif age > 35:
-            days_until_next = 90
-        else:
-            days_until_next = 180
+    # Dynamic next check-up logic with cap
+if prediction == 1:
+    if age > 50 or bmi > 30:
+        days_until_next = 30
+    elif age > 35:
+        days_until_next = 90
     else:
-        days_until_next = 365 if age < 40 else 180
-    next_check = datetime.today() + timedelta(days=days_until_next + 15)
-    st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}`")
+        days_until_next = 180
+else:
+    days_until_next = 180  # Instead of 365
+
+# Add a 15-day buffer, but cap it to 6 months (180 days)
+final_days = min(days_until_next + 15, 180)
+next_check = datetime.today() + timedelta(days=final_days)
+
+st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}`")
+
 
     # Save CSV
     df = pd.DataFrame({
