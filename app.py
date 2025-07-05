@@ -6,14 +6,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
-# Load model and scaler
 model = joblib.load('models/model.pkl')
 scaler = joblib.load('models/scaler.pkl')
 
-# Page config
 st.set_page_config(page_title="🩺 Pro Health Risk Predictor", page_icon="💊", layout="centered")
 
-# Inject custom CSS
 st.markdown("""
     <style>
         html, body, [class*="css"]  {
@@ -42,7 +39,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
 st.sidebar.markdown("## ℹ️ About")
 st.sidebar.info("""
 This app predicts diabetes risk using **machine learning**.
@@ -53,12 +49,10 @@ This app predicts diabetes risk using **machine learning**.
 st.sidebar.markdown("## 🔒 Privacy")
 st.sidebar.caption("This app **does not store** any personal data. All inputs stay local.")
 
-# Title
 st.markdown("<h1 style='text-align: center; color: #4CAF50;'>💊 Pro Health Risk Predictor</h1>", unsafe_allow_html=True)
 st.markdown("Check your diabetes risk with personalized insights and health tips.")
 st.markdown("---")
 
-# Form
 with st.form("health_form"):
     st.markdown("### 🔍 Enter Your Health Info")
     col1, col2, col3 = st.columns(3)
@@ -75,14 +69,12 @@ with st.form("health_form"):
         bmi = st.number_input("⚖️ BMI", 0.0, 70.0, 25.0, step=0.1)
     submitted = st.form_submit_button("🚀 Predict Now")
 
-# BMI Category
 def get_bmi_category(bmi):
     if bmi < 18.5: return "Underweight", "🔵"
     elif 18.5 <= bmi < 25: return "Normal", "🟢"
     elif 25 <= bmi < 30: return "Overweight", "🟠"
     else: return "Obese", "🔴"
 
-# Prediction
 if submitted:
     st.markdown("---")
     input_data = np.array([[preg, gluc, bp, skin, insulin, bmi, dpf, age]])
@@ -118,9 +110,8 @@ if submitted:
     st.markdown("### 🧭 Health Risk Meter")
     st.progress(int(probability))
 
-    # Chart
     st.markdown("### 📈 Your Key Metrics")
-    fig, ax = plt.subplots(figsize=(6,3))
+    fig, ax = plt.subplots(figsize=(6, 3))
     labels = ['Glucose', 'BP', 'BMI', 'Age']
     values = [gluc, bp, bmi, age]
     ax.bar(labels, values, color=['#FF8A80', '#4FC3F7', '#81C784', '#BA68C8'])
@@ -128,7 +119,6 @@ if submitted:
     ax.set_title("Health Parameters")
     st.pyplot(fig)
 
-    # Risk Table
     st.markdown("### 📋 Risk Interpretation")
     risk_data = {
         "Parameter": ["Glucose", "BP", "BMI", "Age"],
@@ -146,27 +136,22 @@ if submitted:
     if 40 <= probability <= 60:
         st.warning("⚠️ Medium confidence prediction. Consider professional evaluation.")
 
-    # Checkup Schedule
     st.markdown("### 📆 Personalized Health Check Reminder")
-    # Dynamic next check-up logic with cap
-if prediction == 1:
-    if age > 50 or bmi > 30:
-        days_until_next = 30
-    elif age > 35:
-        days_until_next = 90
+
+    if prediction == 1:
+        if age > 50 or bmi > 30:
+            days_until_next = 30
+        elif age > 35:
+            days_until_next = 90
+        else:
+            days_until_next = 180
     else:
         days_until_next = 180
-else:
-    days_until_next = 180  # Instead of 365
 
-# Add a 15-day buffer, but cap it to 6 months (180 days)
-final_days = min(days_until_next + 15, 180)
-next_check = datetime.today() + timedelta(days=final_days)
+    final_days = min(days_until_next + 15, 180)
+    next_check = datetime.today() + timedelta(days=final_days)
+    st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}`")
 
-st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}`")
-
-
-    # Save CSV
     df = pd.DataFrame({
         "Timestamp": [datetime.now()],
         "Preg": [preg], "Glucose": [gluc], "BP": [bp], "Skin": [skin],
@@ -184,5 +169,4 @@ st.info(f"📅 **Next recommended checkup:** `{next_check.strftime('%B %d, %Y')}
     df.to_csv("history.csv", index=False)
     st.download_button("📥 Download Report", df.to_csv(index=False), file_name="health_report.csv")
 
-# Footer
 st.markdown("<hr><center style='color:gray;'>Made with ❤️ by <b>Siva</b> | Powered by Scikit-learn + Streamlit</center>", unsafe_allow_html=True)
